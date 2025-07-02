@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">catatan pengeluaran</string>
+    <string name="total_hint">Jumlah (contoh: 5000)</string>
+    <string name="notes_hint">Catatan (opsional)</string>
+    <string name="save_btn">Simpan</string>
+    <string name="total_text">Total: Rp 0</string>
+    <string name="total_update">"Total: %1$s"</string>
+</resources>

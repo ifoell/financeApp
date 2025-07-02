@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fitsSystemWindows="true"
+                android:background="@color/background_color">
+
+    <!-- Toolbar -->
+    <include
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar" />
+
+    <!-- Header CardView -->
+    <androidx.cardview.widget.CardView
+            android:id="@+id/cardHeader"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_below="@id/toolbar"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/dark"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
+
+        <!-- Add your header content here -->
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Main Content -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/cardHeader"
+            android:layout_marginTop="-24dp"
+            android:background="@drawable/bg_half_rounded">
+
+        <androidx.core.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fillViewport="true">
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                <!-- Input Section -->
+                <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:hint="@string/total_hint">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editAmount"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:textColor="#000000" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:hint="@string/notes_hint">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editNote"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="#000000" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Save Button -->
+                <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnSave"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/save_btn"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        app:icon="@drawable/ic_save"
+                        app:iconGravity="textStart" />
+
+                <!-- Total Section -->
+                <TextView
+                        android:id="@+id/textTotal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:text="@string/total_text"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:gravity="center" />
+
+                <!-- Transactions List -->
+                <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerViewTransactions"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:clipToPadding="false"
+                        android:paddingBottom="72dp" />
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</RelativeLayout>
