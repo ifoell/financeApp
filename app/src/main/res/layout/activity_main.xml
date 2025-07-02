@@ -114,9 +114,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="260dp"
                         android:layout_marginTop="50dp"
-                        android:clipToPadding="false"
+                        android:clipToPadding="true"
                         android:background="@drawable/custom_border"
-                        android:paddingBottom="72dp"/>
+                        android:paddingBottom="10dp"/>
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>

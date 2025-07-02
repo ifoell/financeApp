@@ -49,7 +49,10 @@ public class MainActivity extends AppCompatActivity {
 
 		// Inisialisasi list dan adapter
 		transactionList = new ArrayList<>();
-		adapter = new TransactionAdapter(transactionList, this::removeTransaction);
+		adapter = new TransactionAdapter(
+				transactionList,
+				this::removeTransaction,
+				DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
 		recyclerView.setAdapter(adapter);
 
 		// Tombol simpan
@@ -138,15 +141,30 @@ public class MainActivity extends AppCompatActivity {
 				Toast.LENGTH_SHORT).show();
 	}
 
-	private void removeTransaction(int position) {
-		// Get the actual ID of the transaction to be deleted from the database
-		long transactionIdToDelete = transactionList.get(position).getId();
-		if (dbHelper.deleteRecord(transactionIdToDelete)){
-			double amount = transactionList.get(position).getAmount();
-			totalExpense -= amount;
-			transactionList.remove(position);
-			adapter.notifyItemRemoved(position);
+	private void removeTransaction(long transactionId) {
+		// Find the actual position in the list
+		int positionToRemove = -1;
+		double amountToRemove = 0;
+
+		for (int i = 0; i < transactionList.size(); i++) {
+			if (transactionList.get(i).getId() == transactionId) {
+				positionToRemove = i;
+				amountToRemove = transactionList.get(i).getAmount();
+				break;
+			}
+		}
+
+		if (positionToRemove == -1) {
+			return; // Transaction not found
+		}
+
+		if (dbHelper.deleteRecord(transactionId)) {
+			transactionList.remove(positionToRemove);
+			totalExpense -= amountToRemove;
+			adapter.notifyItemRemoved(positionToRemove);
 			updateTotalText();
+		} else {
+			Toast.makeText(this, "Gagal menghapus transaksi", Toast.LENGTH_SHORT).show();
 		}
 	}
 

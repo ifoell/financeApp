@@ -53,17 +53,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 		// Insert and get the ID of the new record
 		long id = db.insert(TABLE_TRANSACTIONS, null, values);
+
+		System.out.println("id neeh"+id);
 		db.close();
 		return id;
 	}
 
 	public boolean deleteRecord(long id) {
 		SQLiteDatabase db = this.getWritableDatabase();
-		int rowsAffected = db.delete(TABLE_TRANSACTIONS,
+		int rowsDeleted = db.delete(TABLE_TRANSACTIONS,
 				COLUMN_ID + " = ?",
 				new String[]{String.valueOf(id)});
 		db.close();
-		return rowsAffected > 0;
+		return rowsDeleted > 0;
 	}
 
 	// Additional useful methods

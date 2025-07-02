@@ -9,20 +9,36 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder> {
 
-    private ArrayList<Transaction> transactions;
-    private OnDeleteClickListener listener;
+    private final ArrayList<Transaction> transactions;
+    private final OnDeleteClickListener listener;
+    private final DateTimeFormatter dateFormat;
 
-    public interface OnDeleteClickListener {
-        void onDeleteClick(int position);
+    @Override
+    public long getItemId(int position) {
+        return transactions.get(position).getId();
     }
 
-    public TransactionAdapter(ArrayList<Transaction> transactions, OnDeleteClickListener listener) {
+    @Override
+    public void setHasStableIds(boolean hasStableIds) {
+        super.setHasStableIds(true);
+    }
+
+    public interface OnDeleteClickListener {
+        void onDeleteClick(long transactionId);
+    }
+
+    public TransactionAdapter(ArrayList<Transaction> transactions, OnDeleteClickListener listener, DateTimeFormatter dateFormat) {
         this.transactions = transactions;
         this.listener = listener;
+        this.dateFormat = dateFormat;
     }
 
     @NonNull
@@ -35,9 +51,29 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     @Override
     public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
         Transaction transaction = transactions.get(position);
-        holder.textTransaction.setText(transaction.toString());
-        holder.btnDelete.setOnClickListener(v -> listener.onDeleteClick(position));
+
+        String formattedTransaction = formatTransaction(transaction);
+        holder.textTransaction.setText(formattedTransaction);
+
+        holder.btnDelete.setOnClickListener(v -> listener.onDeleteClick(transaction.getId()));
     }
+
+    private String formatTransaction(Transaction transaction) {
+        String formattedDate = transaction.getTimestamp();
+
+        // Format amount with currency (assuming IDR)
+        String formattedAmount = String.format(Locale.getDefault(), "Rp %,.0f", transaction.getAmount());
+
+        String formattedNote = transaction.getNote().isEmpty() ? "" : " - "+transaction.getNote();
+
+        // Build the final string
+        return String.format(Locale.getDefault(),
+                "%s%s\n      %s",
+                formattedAmount,
+                formattedNote,
+                formattedDate);
+    }
+
 
     @Override
     public int getItemCount() {

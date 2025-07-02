@@ -14,6 +14,19 @@ public class Transaction {
     private long id;
     private final double amount;
     private String note;
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
     private final String timestamp;
 
     public Transaction(long id, double amount, String note, String timestamp) {
