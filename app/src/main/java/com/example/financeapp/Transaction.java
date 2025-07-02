@@ -7,6 +7,10 @@ public class Transaction {
         this.id = id;
     }
 
+    public long getId() {
+        return id;
+    }
+
     private long id;
     private final double amount;
     private final String note;

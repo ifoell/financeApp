@@ -17,9 +17,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	private static final String TABLE_TRANSACTIONS = "transactions";
 
 	// Column names
-	private static final String COLUMN_ID = "id";
-	private static final String COLUMN_AMOUNT = "amount";
-	private static final String COLUMN_NOTE = "note";
+	public static final String COLUMN_ID = "id";
+	public static final String COLUMN_AMOUNT = "amount";
+	public static final String COLUMN_NOTE = "note";
 	private static final String COLUMN_TIMESTAMP = "timestamp";
 
 	public DatabaseHelper(Context context) {

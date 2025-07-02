@@ -1,6 +1,7 @@
 package com.example.financeapp;
 
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -9,6 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -17,7 +19,7 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
 
 	EditText editAmount, editNote;
-	ImageButton btnSave;
+	MaterialButton btnSave;
 	TextView textTotal;
 	RecyclerView recyclerView;
 
@@ -31,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+		dbHelper = new DatabaseHelper(this);
 
 		// Inisialisasi view
 		editAmount = findViewById(R.id.editAmount);
@@ -47,6 +51,28 @@ public class MainActivity extends AppCompatActivity {
 
 		// Tombol simpan
 		btnSave.setOnClickListener(v -> addTransaction());
+
+		// Load existing transactions
+		loadTransactions();
+	}
+
+	private void loadTransactions() {
+		Cursor cursor = dbHelper.getAllTransactions();
+		if (cursor != null) {
+			while (cursor.moveToNext()) {
+				long id = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID));
+				double amount = cursor.getDouble(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_AMOUNT));
+				String note = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_NOTE));
+				// String timestamp = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_TIMESTAMP)); // If you need it
+
+				Transaction transaction = new Transaction(id, amount, note);
+				transactionList.add(transaction);
+				totalExpense += amount;
+			}
+			cursor.close();
+			adapter.notifyDataSetChanged(); // Notify adapter after loading all data
+			updateTotalText(); // Update the total expense text view
+		}
 	}
 
 	private void addTransaction() {
@@ -103,7 +129,9 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void removeTransaction(int position) {
-		if (dbHelper.deleteRecord(position)){
+		// Get the actual ID of the transaction to be deleted from the database
+		long transactionIdToDelete = transactionList.get(position).getId();
+		if (dbHelper.deleteRecord(transactionIdToDelete)){
 			double amount = transactionList.get(position).getAmount();
 			totalExpense -= amount;
 			transactionList.remove(position);
