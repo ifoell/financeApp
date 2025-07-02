@@ -20,7 +20,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 	public static final String COLUMN_ID = "id";
 	public static final String COLUMN_AMOUNT = "amount";
 	public static final String COLUMN_NOTE = "note";
-	private static final String COLUMN_TIMESTAMP = "timestamp";
+	public static final String COLUMN_TIMESTAMP = "timestamp";
 
 	public DatabaseHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -79,13 +79,4 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		);
 	}
 
-	public double getTotalExpenses() {
-		SQLiteDatabase db = this.getReadableDatabase();
-		Cursor cursor = db.rawQuery("SELECT SUM(" + COLUMN_AMOUNT + ") FROM " + TABLE_TRANSACTIONS, null);
-		if (cursor.moveToFirst()) {
-			return cursor.getDouble(0);
-		}
-		cursor.close();
-		return 0;
-	}
 }

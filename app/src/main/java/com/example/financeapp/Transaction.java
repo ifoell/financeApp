@@ -13,25 +13,24 @@ public class Transaction {
 
     private long id;
     private final double amount;
-    private final String note;
+    private String note;
+    private final String timestamp;
 
-    public Transaction(long id, double amount, String note) {
+    public Transaction(long id, double amount, String note, String timestamp) {
         this.id = id;
         this.amount = amount;
         this.note = note;
+	    this.timestamp = timestamp;
     }
 
     public double getAmount() {
         return amount;
     }
 
-    public String getNote() {
-        return note;
-    }
-
     @Override
     public @NotNull String toString() {
-        return "Rp. " + amount + " - " + note;
+        note = this.note.isEmpty()? "":" - " + note;
+	    return "Rp. " + amount + note + " \n       " + timestamp;
     }
 
 }

@@ -4,7 +4,6 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -26,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
 	ArrayList<Transaction> transactionList;
 	TransactionAdapter adapter;
 	DatabaseHelper dbHelper;
+
+	java.text.NumberFormat format = java.text.NumberFormat.getCurrencyInstance(new Locale("in", "ID"));
 
 	double totalExpense = 0;
 
@@ -63,9 +66,9 @@ public class MainActivity extends AppCompatActivity {
 				long id = cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID));
 				double amount = cursor.getDouble(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_AMOUNT));
 				String note = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_NOTE));
-				// String timestamp = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_TIMESTAMP)); // If you need it
+				String timestamp = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.COLUMN_TIMESTAMP));
 
-				Transaction transaction = new Transaction(id, amount, note);
+				Transaction transaction = new Transaction(id, amount, note, timestamp);
 				transactionList.add(transaction);
 				totalExpense += amount;
 			}
@@ -108,9 +111,16 @@ public class MainActivity extends AppCompatActivity {
 			return;
 		}
 
+		LocalDateTime timestamp = LocalDateTime.now();
+
 		// Update UI and data
 		totalExpense += amount;
-		Transaction newTransaction = new Transaction(newId, amount, note);
+		Transaction newTransaction = new Transaction(
+				newId,
+				amount,
+				note,
+				timestamp.format(
+						DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss", new Locale("id", "ID"))));
 		newTransaction.setId(newId); // Assuming your Transaction class has setId()
 		transactionList.add(newTransaction);
 		adapter.notifyItemInserted(transactionList.size() - 1); // Fixed parameter
@@ -142,7 +152,6 @@ public class MainActivity extends AppCompatActivity {
 
 	private void updateTotalText() {
 		Resources res = getResources();
-		java.text.NumberFormat format = java.text.NumberFormat.getCurrencyInstance(new Locale("in", "ID"));
 		String formattedTotal = format.format(totalExpense);
 		textTotal.setText(String.format(res.getString(R.string.total_update), formattedTotal));
 	}
