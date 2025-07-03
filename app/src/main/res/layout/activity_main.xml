@@ -100,26 +100,31 @@
         <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:fillViewport="true">
+                android:fillViewport="true"
+                android:id="@+id/nestedScrollView">
 
-            <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                <!-- Transactions List -->
-                <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerViewTransactions"
-                        android:layout_width="match_parent"
-                        android:layout_height="260dp"
-                        android:layout_marginTop="50dp"
-                        android:clipToPadding="true"
-                        android:background="@drawable/custom_border"
-                        android:paddingBottom="10dp"/>
-
-            </LinearLayout>
         </androidx.core.widget.NestedScrollView>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="16dp"
+                app:layout_anchorGravity="center"
+                app:layout_anchor="@+id/nestedScrollView">
+
+            <!-- Transactions List -->
+            <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewTransactions"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="50dp"
+                    android:layout_marginBottom="20dp"
+                    android:clipToPadding="true"
+                    android:background="@drawable/custom_border"
+                    android:paddingBottom="10dp"/>
+
+        </LinearLayout>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
