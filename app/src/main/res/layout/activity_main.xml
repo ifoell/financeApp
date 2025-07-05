@@ -36,28 +36,38 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:hint="@string/total_hint">
+                    app:hintTextColor="@color/hint_text"
+                    android:textColorHint="@color/hint_text"
+                    android:hint="@string/total_hint"
+                    app:boxBackgroundMode="outline"
+                    app:boxStrokeColor="@color/hint_text">
 
                 <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editAmount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="numberDecimal"
-                        android:textColor="#FFFFFF" />
+                        android:textColor="#FFFFFF"
+                        android:textColorHint="#78909C"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Note Input -->
             <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_marginTop="12dp"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:hint="@string/notes_hint">
+                    android:hint="@string/notes_hint"
+                    android:textColorHint="@color/hint_text"
+                    app:hintTextColor="@color/hint_text"
+                    app:boxBackgroundMode="outline"
+                    app:boxStrokeColor="@color/hint_text"
+                    >
 
                 <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editNote"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:textColor="#FFFFFF"
                         android:textColorHint="#78909C"/>
             </com.google.android.material.textfield.TextInputLayout>
@@ -103,28 +113,27 @@
                 android:fillViewport="true"
                 android:id="@+id/nestedScrollView">
 
-        </androidx.core.widget.NestedScrollView>
-
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:padding="16dp"
-                app:layout_anchorGravity="center"
-                app:layout_anchor="@+id/nestedScrollView">
-
-            <!-- Transactions List -->
-            <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recyclerViewTransactions"
+            <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginTop="50dp"
-                    android:layout_marginBottom="20dp"
-                    android:clipToPadding="true"
-                    android:background="@drawable/custom_border"
-                    android:paddingBottom="10dp"/>
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    app:layout_anchorGravity="center"
+                    app:layout_anchor="@+id/nestedScrollView">
 
-        </LinearLayout>
+                <!-- Transactions List -->
+                <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerViewTransactions"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="50dp"
+                        android:layout_marginBottom="20dp"
+                        android:clipToPadding="true"
+                        android:background="@drawable/custom_border"
+                        android:paddingBottom="10dp"/>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
