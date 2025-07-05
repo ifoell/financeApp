@@ -8,31 +8,31 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.financeapp.adapters.TransactionAdapter
+import androidx.viewpager2.widget.ViewPager2
+import com.example.financeapp.adapters.ViewPagerAdapter
 import com.example.financeapp.helpers.DatabaseHelper
-import com.example.financeapp.models.Transaction
+import com.example.financeapp.models.Transaction // Keep if needed for addTransaction, or remove if handled by fragments
+import com.example.financeapp.ui.DailyFragment // Import DailyFragment
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import java.text.NumberFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.Locale
+// Removed unused imports like LocalDateTime, DateTimeFormatter if addTransaction changes
 
-class MainActivity : AppCompatActivity(), TransactionAdapter.OnDeleteClickListener {
+class MainActivity : AppCompatActivity(), DailyFragment.OnTransactionDeletedListener {
 
     private lateinit var editAmount: EditText
     private lateinit var editNote: EditText
     private lateinit var btnSave: MaterialButton
     private lateinit var textTotal: TextView
-    private lateinit var recyclerView: RecyclerView
+    private lateinit var tabLayout: TabLayout
+    private lateinit var viewPager: ViewPager2
+    private lateinit var viewPagerAdapter: ViewPagerAdapter
 
-    private lateinit var transactionList: ArrayList<Transaction>
-    private lateinit var adapter: TransactionAdapter
     private lateinit var dbHelper: DatabaseHelper
-
     private val currencyFormatter: NumberFormat = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
-    private var totalExpense: Double = 0.0
+    private var totalExpense: Double = 0.0 // This will now be loaded differently
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,44 +45,61 @@ class MainActivity : AppCompatActivity(), TransactionAdapter.OnDeleteClickListen
         editNote = findViewById(R.id.editNote)
         btnSave = findViewById(R.id.btnSave)
         textTotal = findViewById(R.id.textTotal)
-        recyclerView = findViewById(R.id.recyclerViewTransactions)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        tabLayout = findViewById(R.id.tabLayout)
+        viewPager = findViewById(R.id.viewPager)
 
-        // Initialize list and adapter
-        transactionList = ArrayList()
-        adapter = TransactionAdapter(
-            transactionList,
-            this, // Method reference
-            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss") // Keep or adjust as needed
-        )
-        recyclerView.adapter = adapter
+        // Setup ViewPager and TabLayout
+        viewPagerAdapter = ViewPagerAdapter(this)
+        viewPager.adapter = viewPagerAdapter
+
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            tab.text = when (position) {
+                0 -> "Daily"
+                1 -> "Monthly"
+                else -> null
+            }
+        }.attach()
+
+        // Set listener for DailyFragment's delete operations
+        viewPagerAdapter.getDailyFragment().setOnTransactionDeletedListener(this)
+
 
         // Save button click listener
         btnSave.setOnClickListener { addTransaction() }
 
-        // Load existing transactions
-        loadTransactions()
+        // Load initial total expense
+        loadInitialTotalExpense()
     }
 
-    @SuppressLint("NotifyDataSetChanged") // Consider more specific notify calls if possible
-    private fun loadTransactions() {
-        val cursor: Cursor? = dbHelper.getAllTransactions()
-        cursor?.use { // use extension function ensures the cursor is closed
-            transactionList.clear() // Clear list before loading
-            totalExpense = 0.0 // Reset total expense
-            while (it.moveToNext()) {
-                val id = it.getLong(it.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID))
-                val amount = it.getDouble(it.getColumnIndexOrThrow(DatabaseHelper.COLUMN_AMOUNT))
-                val note = it.getString(it.getColumnIndexOrThrow(DatabaseHelper.COLUMN_NOTE))
-                val timestamp = it.getString(it.getColumnIndexOrThrow(DatabaseHelper.COLUMN_TIMESTAMP))
+    // This method is called when a transaction is deleted in DailyFragment
+    override fun onTransactionDeleted() {
+        // Reload total expense and update fragments
+        loadInitialTotalExpense() // Recalculates total from DB
+        viewPagerAdapter.getDailyFragment().refreshTransactions() // Refresh daily view
+        viewPagerAdapter.getMonthlyFragment().refreshSummary() // Refresh monthly view
+    }
 
-                val transaction = Transaction(id, amount, note, timestamp)
-                transactionList.add(transaction)
+
+    // Call this method from DailyFragment when a transaction is deleted
+    fun updateTotalAfterDeletion(amountDeleted: Double) {
+        totalExpense -= amountDeleted
+        updateTotalText()
+        // Also refresh the monthly fragment as its summary might change
+        viewPagerAdapter.getMonthlyFragment().refreshSummary()
+    }
+
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun loadInitialTotalExpense() {
+        val cursor: Cursor? = dbHelper.getAllTransactions()
+        totalExpense = 0.0 // Reset total expense
+        cursor?.use {
+            while (it.moveToNext()) {
+                val amount = it.getDouble(it.getColumnIndexOrThrow(DatabaseHelper.COLUMN_AMOUNT))
                 totalExpense += amount
             }
-            adapter.notifyDataSetChanged() // Notify adapter after loading all data
-            updateTotalText() // Update the total expense text view
         }
+        updateTotalText()
     }
 
     private fun addTransaction() {
@@ -100,7 +117,7 @@ class MainActivity : AppCompatActivity(), TransactionAdapter.OnDeleteClickListen
         } catch (e: NumberFormatException) {
             editAmount.error = "Format jumlah tidak valid"
             editAmount.requestFocus()
-            println(e.message)
+            // Consider logging e.message instead of println for production apps
             return
         }
 
@@ -111,67 +128,37 @@ class MainActivity : AppCompatActivity(), TransactionAdapter.OnDeleteClickListen
         }
 
         val newId = dbHelper.addNewRecord(amount, note)
-        if (newId == -1L) { // In Kotlin, compare Long with -1L
+        if (newId == -1L) {
             Toast.makeText(this, "Gagal menyimpan transaksi", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // The timestamp from the database is generated by DEFAULT CURRENT_TIMESTAMP
-        // We need to fetch it or rely on the one from DB if TransactionAdapter uses it directly.
-        // For consistency, it might be better to fetch the record from DB again or
-        // ensure the format used here matches the one expected by TransactionAdapter / display logic.
-        // The original Java code created a new LocalDateTime.now() for the Transaction object,
-        // which might differ from the database's CURRENT_TIMESTAMP.
-        // Let's assume we want to display the time of insertion from the app side for now.
-        val timestamp = LocalDateTime.now()
-            .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss", Locale("id", "ID")))
-
-        val newTransaction = Transaction(newId, amount, note, timestamp)
-        // newTransaction.id is already set by the constructor in the data class
-
-        transactionList.add(newTransaction)
+        // Update total expense
         totalExpense += amount
-        adapter.notifyItemInserted(transactionList.size - 1)
         updateTotalText()
 
+        // Clear input fields
         editAmount.text.clear()
         editNote.text.clear()
         editAmount.requestFocus()
 
         val formattedAmount = currencyFormatter.format(amount)
         Toast.makeText(this, "Transaksi berhasil: $formattedAmount", Toast.LENGTH_SHORT).show()
+
+        // Refresh the fragments
+        viewPagerAdapter.getDailyFragment().refreshTransactions()
+        viewPagerAdapter.getMonthlyFragment().refreshSummary()
     }
 
-    private fun removeTransaction(transactionId: Long) {
-        val positionToRemove = transactionList.indexOfFirst { it.id == transactionId }
-
-        if (positionToRemove == -1) {
-            return // Transaction not found
-        }
-
-        val amountToRemove = transactionList[positionToRemove].amount
-
-        if (dbHelper.deleteRecord(transactionId)) {
-            transactionList.removeAt(positionToRemove)
-            totalExpense -= amountToRemove
-            adapter.notifyItemRemoved(positionToRemove)
-            // Consider also notifying range changed if positions shift:
-            // adapter.notifyItemRangeChanged(positionToRemove, transactionList.size)
-            updateTotalText()
-        } else {
-            Toast.makeText(this, "Gagal menghapus transaksi", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    @SuppressLint("StringFormatMatches") // Suppress if R.string.total_update has correct format specifiers
+    @SuppressLint("StringFormatMatches")
     private fun updateTotalText() {
         val res: Resources = resources
         val formattedTotal = currencyFormatter.format(totalExpense)
-        // Assuming R.string.total_update is "Total Pengeluaran: %s" or similar
+        // Ensure R.string.total_update exists and is "Total Pengeluaran: %s" or similar
         textTotal.text = getString(R.string.total_update, formattedTotal)
     }
 
-    override fun onDeleteClick(transactionId: Long) {
-        removeTransaction(transactionId)
-    }
+    // The onDeleteClick from TransactionAdapter.OnDeleteClickListener is removed
+    // as this is now handled by DailyFragment.
+    // MainActivity now implements DailyFragment.OnTransactionDeletedListener
 }
