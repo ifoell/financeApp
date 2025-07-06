@@ -1,5 +1,6 @@
 package com.example.financeapp.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.financeapp.MainActivity
 import com.example.financeapp.R
 import com.example.financeapp.adapters.TransactionAdapter
 import com.example.financeapp.helpers.DatabaseHelper
@@ -74,6 +76,7 @@ class DailyFragment : Fragment(), TransactionAdapter.OnDeleteClickListener {
         textDayName.text = dayFormat.format(calendar.time)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun loadDailyTransactions() {
         // TODO: Implement actual data loading logic from DatabaseHelper for a specific day
         // For now, this is a placeholder. You'll need to modify DatabaseHelper
@@ -87,7 +90,7 @@ class DailyFragment : Fragment(), TransactionAdapter.OnDeleteClickListener {
         val cursor = dbHelper.getTransactionsForDate(todayDateStr) // This method needs to be created in DatabaseHelper
 
         dailyTransactions.clear()
-        cursor?.use {
+        cursor.use {
             while (it.moveToNext()) {
                 val id = it.getLong(it.getColumnIndexOrThrow(DatabaseHelper.COLUMN_ID))
                 val amount = it.getDouble(it.getColumnIndexOrThrow(DatabaseHelper.COLUMN_AMOUNT))

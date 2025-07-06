@@ -1,5 +1,6 @@
 package com.example.financeapp.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -57,6 +58,7 @@ class MonthlyFragment : Fragment() {
         textMonthName.text = monthFormat.format(calendar.time)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun loadMonthlySummary() {
         // TODO: Implement actual data loading logic from DatabaseHelper for monthly summaries
         // This is a placeholder. You'll need to modify DatabaseHelper
