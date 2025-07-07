@@ -43,6 +43,8 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.recyclerview)
     implementation(libs.core.ktx)
+    implementation("androidx.fragment:fragment-ktx:1.8.8")
+    implementation("androidx.activity:activity-ktx:1.10.1")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

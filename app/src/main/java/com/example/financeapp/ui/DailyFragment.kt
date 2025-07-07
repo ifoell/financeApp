@@ -7,12 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels // Import for activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.financeapp.MainActivity
+// Remove MainActivity import if no longer directly needed for callbacks
 import com.example.financeapp.R
 import com.example.financeapp.adapters.TransactionAdapter
 import com.example.financeapp.helpers.DatabaseHelper
+import com.example.financeapp.viewmodels.SharedViewModel // Import SharedViewModel
 import com.example.financeapp.models.Transaction
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -26,17 +28,9 @@ class DailyFragment : Fragment(), TransactionAdapter.OnDeleteClickListener {
     private lateinit var transactionAdapter: TransactionAdapter
     private var dailyTransactions: ArrayList<Transaction> = ArrayList()
     private lateinit var dbHelper: DatabaseHelper
+    private val sharedViewModel: SharedViewModel by activityViewModels() // Get Activity-scoped ViewModel
 
-    // Define a listener interface
-    interface OnTransactionDeletedListener {
-        fun onTransactionDeleted()
-    }
-    private var listener: OnTransactionDeletedListener? = null
-
-    fun setOnTransactionDeletedListener(listener: OnTransactionDeletedListener) {
-        this.listener = listener
-    }
-
+    // Listener interface and its usage are removed.
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -60,13 +54,22 @@ class DailyFragment : Fragment(), TransactionAdapter.OnDeleteClickListener {
         recyclerViewDailyTransactions.adapter = transactionAdapter
 
         loadDailyTransactions()
+
+        // Observe transaction changes from SharedViewModel to refresh transactions
+        sharedViewModel.transactionChanged.observe(viewLifecycleOwner) { changed ->
+            if (changed) {
+                loadDailyTransactions()
+                // No need to call sharedViewModel.doneNotifyingTransactionChange() here,
+                // MainActivity does it, or MonthlyFragment if it also observes.
+            }
+        }
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setDayName()
-        loadDailyTransactions()
+        // loadDailyTransactions() // Already called in onCreateView and observed
     }
 
     private fun setDayName() {
@@ -116,16 +119,16 @@ class DailyFragment : Fragment(), TransactionAdapter.OnDeleteClickListener {
             if (position != -1) {
                 dailyTransactions.removeAt(position)
                 transactionAdapter.notifyItemRemoved(position)
-                // Notify MainActivity to update total
-                (activity as? MainActivity)?.updateTotalAfterDeletion(amountToRemove)
-                listener?.onTransactionDeleted()
-
+                // Notify SharedViewModel that a transaction has changed
+                sharedViewModel.notifyTransactionChanged()
             }
         }
     }
 
-    // Call this method from MainActivity after a new transaction is added
-    fun refreshTransactions() {
-        loadDailyTransactions()
-    }
+    // The refreshTransactions() method might no longer be needed if LiveData observation handles updates.
+    // Or it can be kept if external direct refresh is still desired for some reason.
+    // For now, let's assume LiveData handles it.
+    // fun refreshTransactions() {
+    //     loadDailyTransactions()
+    // }
 }

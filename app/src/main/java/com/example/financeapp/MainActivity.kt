@@ -9,10 +9,12 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
+import androidx.activity.viewModels
 import com.example.financeapp.adapters.ViewPagerAdapter
 import com.example.financeapp.helpers.DatabaseHelper
 import com.example.financeapp.models.Transaction // Keep if needed for addTransaction, or remove if handled by fragments
 import com.example.financeapp.ui.DailyFragment // Import DailyFragment
+import com.example.financeapp.viewmodels.SharedViewModel // Import SharedViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -20,7 +22,7 @@ import java.text.NumberFormat
 import java.util.Locale
 // Removed unused imports like LocalDateTime, DateTimeFormatter if addTransaction changes
 
-class MainActivity : AppCompatActivity(), DailyFragment.OnTransactionDeletedListener {
+class MainActivity : AppCompatActivity() { // Removed DailyFragment.OnTransactionDeletedListener
 
     private lateinit var editAmount: EditText
     private lateinit var editNote: EditText
@@ -31,6 +33,7 @@ class MainActivity : AppCompatActivity(), DailyFragment.OnTransactionDeletedList
     private lateinit var viewPagerAdapter: ViewPagerAdapter
 
     private lateinit var dbHelper: DatabaseHelper
+    private val sharedViewModel: SharedViewModel by viewModels() // Initialize SharedViewModel
     private val currencyFormatter: NumberFormat = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
     private var totalExpense: Double = 0.0 // This will now be loaded differently
 
@@ -60,34 +63,25 @@ class MainActivity : AppCompatActivity(), DailyFragment.OnTransactionDeletedList
             }
         }.attach()
 
-        // Set listener for DailyFragment's delete operations
-        viewPagerAdapter.getDailyFragment().setOnTransactionDeletedListener(this)
-
-
         // Save button click listener
         btnSave.setOnClickListener { addTransaction() }
 
         // Load initial total expense
         loadInitialTotalExpense()
+
+        // Observe transaction changes from SharedViewModel to update total expense
+        sharedViewModel.transactionChanged.observe(this) { changed ->
+            if (changed) {
+                loadInitialTotalExpense() // Recalculates total from DB
+                // Fragments will observe this LiveData themselves to refresh
+                sharedViewModel.doneNotifyingTransactionChange() // Reset flag
+            }
+        }
     }
 
-    // This method is called when a transaction is deleted in DailyFragment
-    override fun onTransactionDeleted() {
-        // Reload total expense and update fragments
-        loadInitialTotalExpense() // Recalculates total from DB
-        viewPagerAdapter.getDailyFragment().refreshTransactions() // Refresh daily view
-        viewPagerAdapter.getMonthlyFragment().refreshSummary() // Refresh monthly view
-    }
-
-
-    // Call this method from DailyFragment when a transaction is deleted
-    fun updateTotalAfterDeletion(amountDeleted: Double) {
-        totalExpense -= amountDeleted
-        updateTotalText()
-        // Also refresh the monthly fragment as its summary might change
-        viewPagerAdapter.getMonthlyFragment().refreshSummary()
-    }
-
+    // onTransactionDeleted and updateTotalAfterDeletion are removed.
+    // DailyFragment will update SharedViewModel.
+    // MonthlyFragment will observe SharedViewModel.
 
     @SuppressLint("NotifyDataSetChanged")
     private fun loadInitialTotalExpense() {
@@ -145,9 +139,8 @@ class MainActivity : AppCompatActivity(), DailyFragment.OnTransactionDeletedList
         val formattedAmount = currencyFormatter.format(amount)
         Toast.makeText(this, "Transaksi berhasil: $formattedAmount", Toast.LENGTH_SHORT).show()
 
-        // Refresh the fragments
-        viewPagerAdapter.getDailyFragment().refreshTransactions()
-        viewPagerAdapter.getMonthlyFragment().refreshSummary()
+        // Notify observers (fragments) that a transaction has changed
+        sharedViewModel.notifyTransactionChanged()
     }
 
     @SuppressLint("StringFormatMatches")
