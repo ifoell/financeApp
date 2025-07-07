@@ -5,4 +5,5 @@
     <string name="save_btn">Simpan</string>
     <string name="total_text">Total: Rp 0</string>
     <string name="total_update">"Total: %1$s"</string>
+    <string name="tab_transaction_desc">The tabbed layout for transaction</string>
 </resources>

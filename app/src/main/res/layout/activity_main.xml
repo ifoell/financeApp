@@ -114,7 +114,8 @@
             android:background="@color/dark_blue"
             app:tabTextColor="@color/hint_text"
             app:tabSelectedTextColor="@color/white"
-            app:tabIndicatorColor="@color/purple_accent"/>
+            app:tabIndicatorColor="@color/purple_accent"
+            android:contentDescription="@string/tab_transaction_desc"/>
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPager"

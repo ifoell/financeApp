@@ -118,16 +118,24 @@
                         android:textColor="@color/white"
                         android:gravity="center" />
 
-                <!-- Transactions List -->
-                <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerViewTransactions"
+                <!-- Tabs and ViewPager -->
+                <com.google.android.material.tabs.TabLayout
+                        android:id="@+id/tabLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:background="@color/dark_blue"
+                        app:tabTextColor="@color/hint_text"
+                        app:tabSelectedTextColor="@color/white"
+                        app:tabIndicatorColor="@color/purple_accent"
+                        android:contentDescription="@string/tab_transaction_desc"/>
+
+                <androidx.viewpager2.widget.ViewPager2
+                        android:id="@+id/viewPager"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:layout_margin="16dp"
-                        android:clipToPadding="true"
-                        android:background="@drawable/custom_border"
-                        android:paddingBottom="10dp"/>
+                        android:padding="16dp"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
     </LinearLayout>
